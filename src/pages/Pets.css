@@ -1,0 +1,11 @@
+.pets-list{
+display:flex;
+justify-content:center;
+gap:25px;
+flex-wrap:wrap;
+padding:30px;
+}
+
+h1{
+text-align:center;
+}
