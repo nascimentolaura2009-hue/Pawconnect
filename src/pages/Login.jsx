@@ -1,15 +1,41 @@
+import "./Login.css";
+
 function Login(){
 
 return(
+  <div className="login-container">
 
-<div style={{padding:"40px"}}>
+    <div className="login-card">
 
-<h1>Login</h1>
+      <h1>PawConnect 🐾</h1>
 
-<p>Área de acesso do usuário.</p>
+      <p>Entre para ajudar um animal</p>
 
-</div>
+      <form>
 
+        <label>Email</label>
+        <input 
+          type="email"
+          placeholder="Digite seu email"
+        />
+
+
+        <label>Senha</label>
+        <input 
+          type="password"
+          placeholder="Digite sua senha"
+        />
+
+
+        <button>
+          Entrar
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
 );
 
 }

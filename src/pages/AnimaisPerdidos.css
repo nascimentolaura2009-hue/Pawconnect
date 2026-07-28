@@ -1,0 +1,53 @@
+.perdidos-container{
+    min-height:100vh;
+    background:#0f172a;
+    padding:40px;
+    color:white;
+}
+
+
+.perdidos-container h1{
+    text-align:center;
+}
+
+
+.perdidos-container p{
+    text-align:center;
+    color:#94a3b8;
+}
+
+
+.cards{
+    display:flex;
+    gap:25px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-top:40px;
+}
+
+
+.animal-card{
+    background:#1e293b;
+    width:280px;
+    padding:25px;
+    border-radius:20px;
+}
+
+
+.animal-card h2{
+    color:#22c55e;
+}
+
+
+.animal-card button{
+    width:100%;
+    padding:12px;
+
+    border:none;
+    border-radius:10px;
+
+    background:#22c55e;
+    color:white;
+
+    cursor:pointer;
+}

@@ -11,6 +11,7 @@ import Cadastro from "./pages/Cadastro";
 import CadastroPet from "./pages/CadastroPet";
 import Perfil from "./pages/Perfil";
 import Perdidos from "./pages/Perdidos";
+import AnimaisPerdidos from "./pages/AnimaisPerdidos";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -20,15 +21,24 @@ function App() {
       <Navbar />
 
       <Routes>
+
         <Route path="/" element={<Home />} />
         <Route path="/pets" element={<Pets />} />
         <Route path="/pets/:id" element={<PetDetalhes />} />
+
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
+
         <Route path="/cadastropet" element={<CadastroPet />} />
+
         <Route path="/perfil" element={<Perfil />} />
+
         <Route path="/perdidos" element={<Perdidos />} />
+
+        <Route path="/animais-perdidos" element={<AnimaisPerdidos />} />
+
         <Route path="*" element={<NotFound />} />
+
       </Routes>
 
       <Footer />
