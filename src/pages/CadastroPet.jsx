@@ -1,103 +1,75 @@
 import { useState } from "react";
-import "./CadastroPet.css";
+import API_URL from "../services/api";
 
-function CadastroPet(){
+function CadastroPet() {
+  const [nome, setNome] = useState("");
+  const [especie, setEspecie] = useState("");
+  const [idade, setIdade] = useState("");
+  const [descricao, setDescricao] = useState("");
 
-const[nome,setNome]=useState("");
-const[tipo,setTipo]=useState("");
-const[raca,setRaca]=useState("");
-const[idade,setIdade]=useState("");
-const[cidade,setCidade]=useState("");
-const[descricao,setDescricao]=useState("");
-const[foto,setFoto]=useState("");
+  async function cadastrar(e) {
+    e.preventDefault();
 
-function cadastrar(e){
+    const resposta = await fetch(`${API_URL}/pets`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nome,
+        especie,
+        idade: Number(idade),
+        descricao,
+      }),
+    });
 
-e.preventDefault();
+    if (resposta.ok) {
+      alert("Pet cadastrado com sucesso!");
+      setNome("");
+      setEspecie("");
+      setIdade("");
+      setDescricao("");
+    } else {
+      alert("Erro ao cadastrar pet.");
+    }
+  }
 
-alert("Animal cadastrado!");
+  return (
+    <div>
+      <h2>Cadastrar Pet</h2>
 
-setNome("");
-setTipo("");
-setRaca("");
-setIdade("");
-setCidade("");
-setDescricao("");
-setFoto("");
+      <form onSubmit={cadastrar}>
+        <input
+          type="text"
+          placeholder="Nome"
+          value={nome}
+          onChange={(e) => setNome(e.target.value)}
+        />
 
-}
+        <input
+          type="text"
+          placeholder="Espécie"
+          value={especie}
+          onChange={(e) => setEspecie(e.target.value)}
+        />
 
-return(
+        <input
+          type="number"
+          placeholder="Idade"
+          value={idade}
+          onChange={(e) => setIdade(e.target.value)}
+        />
 
-<div className="cadastroPet">
+        <textarea
+          placeholder="Descrição"
+          value={descricao}
+          onChange={(e) => setDescricao(e.target.value)}
+        />
 
-<h1>Cadastrar Animal 🐾</h1>
-
-<form onSubmit={cadastrar}>
-
-<input
-type="text"
-placeholder="Nome"
-value={nome}
-onChange={(e)=>setNome(e.target.value)}
-required
-/>
-
-<input
-type="text"
-placeholder="Tipo"
-value={tipo}
-onChange={(e)=>setTipo(e.target.value)}
-required
-/>
-
-<input
-type="text"
-placeholder="Raça"
-value={raca}
-onChange={(e)=>setRaca(e.target.value)}
-required
-/>
-
-<input
-type="number"
-placeholder="Idade"
-value={idade}
-onChange={(e)=>setIdade(e.target.value)}
-required
-/>
-
-<input
-type="text"
-placeholder="Cidade"
-value={cidade}
-onChange={(e)=>setCidade(e.target.value)}
-required
-/>
-
-<textarea
-placeholder="Descrição"
-value={descricao}
-onChange={(e)=>setDescricao(e.target.value)}
-></textarea>
-
-<input
-type="text"
-placeholder="URL da Foto"
-value={foto}
-onChange={(e)=>setFoto(e.target.value)}
-/>
-
-<button type="submit">
-Cadastrar Animal
-</button>
-
-</form>
-
-</div>
-
-);
-
+        <button type="submit">Cadastrar</button>
+      </form>
+    </div>
+  );
 }
 
 export default CadastroPet;
