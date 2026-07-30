@@ -36,28 +36,43 @@ function Cadastro() {
 
     setLoading(true);
 
+    const payload = {
+      name: nome.trim(),
+      nome: nome.trim(),
+      email: email.trim(),
+      password: senha,
+      senha: senha,
+    };
+
     try {
-      // Chamada à API real no Back-End para persistência no MongoDB
-      const response = await api.post("/auth/register", {
-        name: nome.trim(),
-        nome: nome.trim(),
-        email: email.trim(),
-        password: senha,
-        senha: senha,
-      });
+      let response;
+      // Tentar a rota principal /auth/register
+      try {
+        response = await api.post("/auth/register", payload);
+      } catch (err) {
+        if (err.response?.status === 404) {
+          // Fallback resiliente para /usuarios ou /register caso ocorra 404
+          try {
+            response = await api.post("/usuarios", payload);
+          } catch (err2) {
+            response = await api.post("/register", payload);
+          }
+        } else {
+          throw err;
+        }
+      }
 
       const data = response.data;
 
-      // Salvar token e dados do usuário se retornados
+      // Salvar token e dados do usuário
       if (data.token) {
         localStorage.setItem("pawconnect_token", data.token);
       }
       const userData = data.usuario || data.user || { nome, email };
       localStorage.setItem("pawconnect_user", JSON.stringify(userData));
 
-      setSuccessMessage("✨ Conta criada com sucesso! Dados salvos no MongoDB. Redirecionando...");
+      setSuccessMessage("✨ Conta criada com sucesso! Redirecionando...");
 
-      // Redirecionar automaticamente para a página Inicial (Home / Dashboard)
       setTimeout(() => {
         navigate("/", { replace: true });
       }, 1200);
@@ -177,7 +192,7 @@ function Cadastro() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>Salvando no Banco...</span>
+                <span>Cadastrando...</span>
               </>
             ) : (
               <span>Cadastrar Conta</span>
