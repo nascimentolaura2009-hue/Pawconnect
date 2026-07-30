@@ -1,14 +1,41 @@
 import { Link } from "react-router-dom";
 
 function PetCard({ pet, id, nome, name, idade, age, tipo, especie, species, imagem, image, status, raca, breed }) {
-  // Extração inteligente de propriedades (compatível com modelos em Inglês e Português)
+  // 1. Extração inteligente das propriedades do pet (bilingue e resiliente)
   const petId = pet?._id || pet?.id || id;
   const petName = pet?.name || pet?.nome || name || nome || "Pet sem nome";
   const petSpecies = pet?.species || pet?.especie || pet?.tipo || species || especie || tipo || "Animal";
   const petBreed = pet?.breed || pet?.raca || breed || raca || "";
   const petAge = pet?.age !== undefined ? pet.age : (pet?.idade !== undefined ? pet.idade : (age !== undefined ? age : idade));
-  const petImage = pet?.image || pet?.imagem || image || imagem || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80";
   const petStatus = pet?.status || status || "available";
+
+  // 2. Extração da URL única da imagem cadastrada no MongoDB
+  const rawCustomImage =
+    pet?.image ||
+    pet?.imagem ||
+    pet?.imageUrl ||
+    pet?.foto ||
+    pet?.photo ||
+    pet?.url ||
+    pet?.fotoUrl ||
+    image ||
+    imagem;
+
+  const hasValidCustomImage =
+    typeof rawCustomImage === "string" &&
+    rawCustomImage.trim().length > 5 &&
+    (rawCustomImage.startsWith("http://") || rawCustomImage.startsWith("https://") || rawCustomImage.startsWith("data:image/"));
+
+  // 3. Fallback visual dinâmico caso a imagem não tenha sido cadastrada
+  const fallbackImage =
+    petSpecies.toLowerCase().includes("gato") || petSpecies.toLowerCase().includes("cat")
+      ? "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=600&q=80"
+      : petSpecies.toLowerCase().includes("ave") || petSpecies.toLowerCase().includes("bird")
+      ? "https://images.unsplash.com/photo-1552728089-57bdde30beb3?auto=format&fit=crop&w=600&q=80"
+      : "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80";
+
+  // Atribuição da imagem final a ser renderizada no elemento <img>
+  const displayImage = hasValidCustomImage ? rawCustomImage.trim() : fallbackImage;
 
   const statusLabel =
     petStatus === "available" || petStatus === "disponivel"
@@ -21,13 +48,15 @@ function PetCard({ pet, id, nome, name, idade, age, tipo, especie, species, imag
     <div className="dark-luxury-card rounded-3xl overflow-hidden border border-amber-500/20 hover:border-amber-400/40 transition-all duration-300 group flex flex-col justify-between h-full">
       <div className="relative">
         <div className="h-52 bg-zinc-950 overflow-hidden relative flex items-center justify-center">
+          {/* Renderização dinâmica da imagem única de cada Pet */}
           <img
-            src={petImage}
+            src={displayImage}
             alt={petName}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             onError={(e) => {
+              // Em caso de erro na URL do usuário (link quebrado), aplica o fallback sem quebrar o layout
               e.target.onerror = null;
-              e.target.src = "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80";
+              e.target.src = fallbackImage;
             }}
           />
         </div>
