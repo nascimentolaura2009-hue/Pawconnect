@@ -26,8 +26,19 @@ function CadastroPet() {
   const fetchPets = async () => {
     setLoadingList(true);
     try {
-      const response = await api.get("/pets");
-      setPetsList(response.data || []);
+      let response;
+      try {
+        response = await api.get("/pets");
+      } catch (err) {
+        if (err.response?.status === 404) {
+          response = await api.get("/api/pets");
+        } else {
+          throw err;
+        }
+      }
+      const rawData = response.data;
+      const arrayData = Array.isArray(rawData) ? rawData : (rawData?.pets || rawData?.data || []);
+      setPetsList(arrayData);
     } catch (err) {
       console.error("Erro ao carregar lista de pets:", err);
     } finally {
@@ -52,7 +63,6 @@ function CadastroPet() {
     setLoading(true);
 
     try {
-      // O backend aceita payload em Inglês e mapeia automaticamente para os modelos
       const payload = {
         name,
         nome: name,
@@ -73,10 +83,19 @@ function CadastroPet() {
         status,
       };
 
-      const response = await api.post("/pets", payload);
+      let response;
+      try {
+        response = await api.post("/pets", payload);
+      } catch (err) {
+        if (err.response?.status === 404) {
+          response = await api.post("/api/pets", payload);
+        } else {
+          throw err;
+        }
+      }
 
       if (response.status === 201 || response.status === 200) {
-        setSuccessMessage(`✨ Pet "${name}" cadastrado com sucesso no PawConnect!`);
+        setSuccessMessage(`✨ Pet "${name}" cadastrado com sucesso! Redirecionando para a página de pets...`);
         
         // Limpar formulário
         setName("");
@@ -86,15 +105,19 @@ function CadastroPet() {
         setImage("");
         setStatus("available");
 
-        // Atualizar lista
         fetchPets();
+
+        // Redirecionar automaticamente para a listagem principal de pets
+        setTimeout(() => {
+          navigate("/pets");
+        }, 1500);
       }
     } catch (error) {
       console.error("Erro no cadastro do pet:", error);
       const msg =
         error.response?.data?.mensagem ||
         error.response?.data?.message ||
-        "Falha ao cadastrar o pet. Verifique os dados fornecidos.";
+        "Falha ao cadastrar o pet. Verifique se o servidor está ativo.";
       setErrorMessage(msg);
     } finally {
       setLoading(false);
@@ -284,7 +307,7 @@ function CadastroPet() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full gold-button py-4 px-6 rounded-xl font-bold text-sm tracking-wide uppercase transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full gold-button py-4 px-6 rounded-xl font-bold text-sm tracking-wide uppercase transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -365,7 +388,7 @@ function CadastroPet() {
               </h3>
               <button
                 onClick={fetchPets}
-                className="text-xs text-amber-400 hover:underline"
+                className="text-xs text-amber-400 hover:underline cursor-pointer"
               >
                 Atualizar
               </button>
