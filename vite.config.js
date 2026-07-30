@@ -8,4 +8,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    port: 5173,
+    proxy: {
+      '/auth': 'http://localhost:5000',
+      '/pets': 'http://localhost:5000',
+      '/usuarios': 'http://localhost:5000',
+      '/api': 'http://localhost:5000',
+    }
+  }
 })
