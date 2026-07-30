@@ -9,6 +9,7 @@ function Cadastro() {
   const [confirmarSenha, setConfirmarSenha] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [coldStartNotice, setColdStartNotice] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -18,6 +19,7 @@ function Cadastro() {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
+    setColdStartNotice(false);
 
     if (!nome || !email || !senha) {
       setErrorMessage("Por favor, preencha todos os campos obrigatórios.");
@@ -36,6 +38,11 @@ function Cadastro() {
 
     setLoading(true);
 
+    // Timer para avisar o usuário caso o Render esteja em Cold Start
+    const coldStartTimer = setTimeout(() => {
+      setColdStartNotice(true);
+    }, 4000);
+
     const payload = {
       name: nome.trim(),
       nome: nome.trim(),
@@ -46,12 +53,10 @@ function Cadastro() {
 
     try {
       let response;
-      // Tentar a rota principal /auth/register
       try {
         response = await api.post("/auth/register", payload);
       } catch (err) {
         if (err.response?.status === 404) {
-          // Fallback resiliente para /usuarios ou /register caso ocorra 404
           try {
             response = await api.post("/usuarios", payload);
           } catch (err2) {
@@ -62,9 +67,11 @@ function Cadastro() {
         }
       }
 
+      clearTimeout(coldStartTimer);
+      setColdStartNotice(false);
+
       const data = response.data;
 
-      // Salvar token e dados do usuário
       if (data.token) {
         localStorage.setItem("pawconnect_token", data.token);
       }
@@ -77,12 +84,19 @@ function Cadastro() {
         navigate("/", { replace: true });
       }, 1200);
     } catch (error) {
+      clearTimeout(coldStartTimer);
+      setColdStartNotice(false);
       console.error("Erro no cadastro de usuário:", error);
-      const msg =
-        error.response?.data?.mensagem ||
-        error.response?.data?.message ||
-        "Erro ao conectar com o servidor. Verifique se o Back-End está ativo.";
-      setErrorMessage(msg);
+
+      if (error.code === "ECONNABORTED" || error.message?.includes("timeout")) {
+        setErrorMessage("⏳ O servidor no Render está acordando do modo de espera. Por favor, tente clicar em 'Cadastrar' novamente agora.");
+      } else if (error.response?.status === 409) {
+        setErrorMessage("⚠️ Este e-mail já está cadastrado em nossa plataforma. Faça login ou use outro e-mail.");
+      } else if (error.response?.data?.mensagem) {
+        setErrorMessage(`⚠️ ${error.response.data.mensagem}`);
+      } else {
+        setErrorMessage("Erro ao conectar com o servidor. Verifique se o Back-End está ativo e tente novamente.");
+      }
     } finally {
       setLoading(false);
     }
@@ -110,14 +124,21 @@ function Cadastro() {
 
         {/* Mensagens de Feedback */}
         {errorMessage && (
-          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm flex items-center gap-3">
+          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm flex items-start gap-3 animate-fade-in">
             <span className="text-lg">⚠️</span>
             <span>{errorMessage}</span>
           </div>
         )}
 
+        {coldStartNotice && loading && (
+          <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-3 animate-pulse">
+            <span className="text-base">🚀</span>
+            <span>O servidor no Render está acordando do repouso gratuito. Aguarde alguns instantes...</span>
+          </div>
+        )}
+
         {successMessage && (
-          <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm flex items-center gap-3">
+          <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm flex items-center gap-3 animate-fade-in">
             <span className="text-lg">✨</span>
             <span>{successMessage}</span>
           </div>
