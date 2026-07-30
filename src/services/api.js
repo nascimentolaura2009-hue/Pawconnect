@@ -4,12 +4,13 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Interceptor to add auth token if available
+// Interceptor para adicionar o token de autenticação em todas as requisições
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("pawconnect_token");
   if (token) {
